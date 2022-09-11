@@ -1,8 +1,8 @@
 import * as THREE from "three";
+import { Mesh } from "three";
 import { Utils } from "../utils/mathUtils";
 //import { AmbientLight, PixelFormat } from "three";
-//import { floorPowerOfTwo } from "three/src/math/MathUtils";
-//import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 const scene = new THREE.Scene();
 
@@ -18,9 +18,9 @@ const backgroundColor = 0x000000;
 const ambientLightColor = 0xed1a21;
 const spotLightColor = 0xed1a21;
 const boxColor = 0x303030;
-const angle = 30;
 const gridSize = 300;
 
+let angle = 30;
 let col: number = gridSize;
 let row: number = gridSize;
 let velocity: number = 0.1;
@@ -37,8 +37,8 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-//const controls = new OrbitControls(camera, renderer.domElement);
-//controls.addEventListener("change", render);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.addEventListener("change", render);
 
 const geometry: THREE.BoxGeometry = new THREE.BoxGeometry();
 const material: THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial({
@@ -49,7 +49,6 @@ const material: THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial({
 const cube: THREE.Mesh = new THREE.Mesh(geometry, material);
 scene.add(cube);
 
-window.addEventListener("resize", onWindowResize, false);
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -63,6 +62,7 @@ function startProgram(): void {
   Utils.addFloor(scene);
   addBoxes(scene);
   render();
+  window.addEventListener("resize", onWindowResize, false);
 }
 
 function animate(): void {
@@ -145,14 +145,32 @@ function addBoxes(scene: THREE.Scene): void {
   mesh.instanceMatrix.needsUpdate = true;
 }
 
-function drawWave(): void {
+function drawWave(this: any): void {
   let n: number = 0;
 
   for (let i: number = 0; i < col; i++) {
     for (let j: number = 0; j < row; j++) {
       const dist: number = Utils.distance(j, i, row * 0.5, col * 0.5);
+
+      const offset: number = Utils.map(dist, 0, waveLength, -100, 100);
+      const ang: number = angle + offset;
+
+      boxes[i][j].scale.y = Utils.map(Math.sin(ang), -1, -amplitude, 0.001, 1);
+      this.mesh.setMatrix(n++, boxes[i][j].matrix);
     }
   }
+  this.mesh.instanceMatrix.needsUpdate = true;
+  angle -= velocity;
+}
+
+function addGrid() {
+  const size: number = col;
+  const divisions: number = size;
+  const gridHelper: THREE.GridHelper = new THREE.GridHelper(size, divisions);
+
+  gridHelper.position.set(0, 0, 0);
+
+  scene.add(gridHelper);
 }
 
 function clearScene(this: any, scene: THREE.Scene): void {
