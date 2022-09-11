@@ -1,6 +1,7 @@
 import * as THREE from "three";
-import { AmbientLight, PixelFormat } from "three";
-import { floorPowerOfTwo } from "three/src/math/MathUtils";
+import { Utils } from "../utils/mathUtils";
+//import { AmbientLight, PixelFormat } from "three";
+//import { floorPowerOfTwo } from "three/src/math/MathUtils";
 //import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 const scene = new THREE.Scene();
@@ -59,7 +60,7 @@ function onWindowResize() {
 function startProgram(): void {
   addAmbientLight();
   addDirectionalLight();
-  addFloor();
+  Utils.addFloor(scene);
   addBoxes(scene);
   render();
 }
@@ -108,39 +109,6 @@ function addDirectionalLight(): void {
   scene.add(directionalLight.target);
 }
 
-function addFloor(): void {
-  const planeGeometry: THREE.PlaneBufferGeometry =
-    new THREE.PlaneBufferGeometry(500, 500);
-  const planeMaterial: THREE.ShadowMaterial = new THREE.ShadowMaterial({
-    opacity: 0.35,
-  });
-
-  let floor: THREE.Mesh = new THREE.Mesh(planeGeometry, planeMaterial);
-
-  planeGeometry.rotateX(-Math.PI / 2);
-  floor.position.y = 2;
-  floor.receiveShadow = true;
-
-  scene.add(floor);
-}
-
-function getBox(
-  geometry: THREE.BoxBufferGeometry,
-  material: THREE.MeshLambertMaterial,
-  count: number
-): THREE.InstancedMesh {
-  const mesh: THREE.InstancedMesh = new THREE.InstancedMesh(
-    geometry,
-    material,
-    count
-  );
-  mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-
-  return mesh;
-}
-
 function addBoxes(scene: THREE.Scene): void {
   const size: number = 1;
   const height: number = 5;
@@ -154,10 +122,10 @@ function addBoxes(scene: THREE.Scene): void {
     size
   );
   geometry.translate(0, 2.5, 0);
-  const mesh: THREE.InstancedMesh = getBox(geometry, material, row * col);
+  const mesh: THREE.InstancedMesh = Utils.getBox(geometry, material, row * col);
   scene.add(mesh);
 
-  let x: number = 0;
+  let n: number = 0;
 
   for (let i: number = 0; i < col; i++) {
     boxes[i] = [];
@@ -170,11 +138,21 @@ function addBoxes(scene: THREE.Scene): void {
       pivot.position.set(i - gridSize * 0.5, height * 0.5, j - gridSize * 0.5);
 
       pivot.updateMatrix();
-      mesh.setMatrixAt(x++, pivot.matrix);
+      mesh.setMatrixAt(n++, pivot.matrix);
     }
   }
 
   mesh.instanceMatrix.needsUpdate = true;
+}
+
+function drawWave(): void {
+  let n: number = 0;
+
+  for (let i: number = 0; i < col; i++) {
+    for (let j: number = 0; j < row; j++) {
+      const dist: number = Utils.distance(j, i, row * 0.5, col * 0.5);
+    }
+  }
 }
 
 function clearScene(this: any, scene: THREE.Scene): void {
