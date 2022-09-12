@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import { Mesh } from "three";
 import { Utils } from "../utils/mathUtils";
-//import { AmbientLight, PixelFormat } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { GUI } from "dat.gui";
 
 const scene = new THREE.Scene();
 
@@ -14,7 +14,7 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.z = 2;
 
-const backgroundColor = 0x000000;
+//const backgroundColor = 0x000000;
 const ambientLightColor = 0xed1a21;
 const spotLightColor = 0xed1a21;
 const boxColor = 0x303030;
@@ -73,6 +73,13 @@ function animate(): void {
 
 function render(): void {
   renderer.render(scene, camera);
+}
+
+function addSpotLight() {
+  let spotLight: THREE.SpotLight = new THREE.SpotLight(spotLightColor);
+  spotLight.position.set(100, 250, 150);
+  spotLight.castShadow = true;
+  scene.add(spotLight);
 }
 
 function addAmbientLight(): void {
